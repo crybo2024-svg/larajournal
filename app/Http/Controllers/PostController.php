@@ -14,7 +14,7 @@ class PostController extends Controller
     public function showHomepage(ViewFactory $view_factory): View
     {
         /** @phpstan-ignore-next-line */
-        $latest_post = Post::paginate(6);
+        $latest_post = Post::with('category')->paginate(6);
         /** @phpstan-ignore-next-line */
         $liked_posts = Post::withCount('likedUsers')->orderBy('liked_users_count', 'desc')->get()->take(3);
 

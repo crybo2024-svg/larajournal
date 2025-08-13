@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -26,6 +27,7 @@ class PostFactory extends Factory
             'preview_image' => 'https://loremflickr.com/640/480?random=' . mt_rand(1, 9999),
             'main_image'    => 'https://loremflickr.com/640/480?random=' . mt_rand(1, 9999),
             'content'       => fake()->realText(5000),
+            'user_id' => User::factory(), // ← これを追加
         ];
     }
 }

@@ -45,7 +45,7 @@
                         <div class="col-12 col-md-7 p-4 d-flex flex-column position-static">
                             <div class="mb-3">
                                 <span class="badge bg-primary rounded-pill">
-                                    {{ $post->category->name ?? 'Uncategorized' }}
+                                    {{ $post->category->title ?? 'Uncategorized' }}
                                 </span>
                             </div>
 

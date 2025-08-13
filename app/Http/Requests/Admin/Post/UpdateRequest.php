@@ -30,6 +30,7 @@ class UpdateRequest extends FormRequest
             'main_image'     => 'nullable|file',
             'tag_ids'        => 'nullable|array',
             'tag_ids.*'      => 'nullable|integer|exists:tags,id',
+            'category_id' => 'nullable|exists:categories,id',  // これがあるか？
         ];
     }
 }

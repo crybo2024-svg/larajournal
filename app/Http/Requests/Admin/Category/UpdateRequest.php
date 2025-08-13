@@ -23,6 +23,8 @@ class UpdateRequest extends FormRequest
     {
         return [
             'title' => 'required|string',
+            'content' => 'required|string',
+            'category_id' => 'nullable|exists:categories,id',
         ];
     }
 }
