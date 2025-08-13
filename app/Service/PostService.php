@@ -6,95 +6,93 @@ use App\Models\Post;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log; // 追加
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-/**
- * TODO Abolish.
- *
- * @deprecated
- */
 class PostService
 {
-    public function store($data)
+    /**
+     * 投稿を作成する
+     */
+    public function store(array $data): Post
     {
         try {
             DB::beginTransaction();
 
+            // slug自動生成
             if (empty($data['slug'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
 
-            if (isset($data['tag_ids'])) {
-                $tagIds = $data['tag_ids'];
-                unset($data['tag_ids']);
-            }
-            if (isset($data['preview_image'])) {
-                $data['preview_image'] = Storage::disk('public')->put('/images', $data['preview_image']);
-            }
-            if (isset($data['main_image'])) {
-                $data['main_image'] = Storage::disk('public')->put('/images', $data['main_image']);
+            // タグ情報取り出し
+            $tagIds = $data['tag_ids'] ?? [];
+            unset($data['tag_ids']);
+
+            // 画像保存
+            foreach (['preview_image', 'main_image'] as $key) {
+                if (!empty($data[$key])) {
+                    $data[$key] = Storage::disk('public')->put('/images', $data[$key]);
+                }
             }
 
-            $post = Post::firstOrCreate($data);
+            // 投稿作成
+            $post = Post::create($data);
 
-            if (isset($tagIds)) {
-                $post->tags()->attach($tagIds);
-            }
-            if (isset($data['category_id'])) {
-                $categoryId = $data['category_id'];
+            // タグ同期
+            if ($tagIds) {
+                $post->tags()->sync($tagIds);
             }
 
             DB::commit();
+            return $post;
         } catch (Exception $e) {
             DB::rollBack();
-
-            // 🔽 ここを追加：ログ出力
             Log::error('PostService::store でエラーが発生', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'data' => $data,
             ]);
-
-            // 🔽 ここを修正：abort(500) から例外スローに変更
             throw $e;
         }
     }
 
-    public function update($data, $post)
+    /**
+     * 投稿を更新する
+     */
+    public function update(array $data, Post $post): Post
     {
         try {
             DB::beginTransaction();
-            if (isset($data['tag_ids'])) {
-                $tagIds = $data['tag_ids'];
-                unset($data['tag_ids']);
-            }
-            // カテゴリ処理
-            $post->update($data);
-            
-            if (isset($data['preview_image'])) {
-                $data['preview_image'] = Storage::disk('public')->put('/images', $data['preview_image']);
-            }
-            if (isset($data['main_image'])) {
-                $data['main_image'] = Storage::disk('public')->put('/images', $data['main_image']);
+
+            // タグ情報取り出し
+            $tagIds = $data['tag_ids'] ?? [];
+            unset($data['tag_ids']);
+
+            // 画像保存
+            foreach (['preview_image', 'main_image'] as $key) {
+                if (!empty($data[$key])) {
+                    $data[$key] = Storage::disk('public')->put('/images', $data[$key]);
+                }
             }
 
+            // 投稿更新
             $post->update($data);
 
-            if (isset($tagIds)) {
+            // タグ同期
+            if ($tagIds) {
                 $post->tags()->sync($tagIds);
             }
-            // カテゴリの同期（中間テーブルに反映）
-            if (isset($categoryId)) {
-                $data['category_id'] = $categoryId;
-            }
-            
-            DB::commit();
-        } catch (Exception) {
-            DB::rollBack();
-            abort(500);
-        }
 
-        return $post;
+            DB::commit();
+            return $post;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('PostService::update でエラーが発生', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data,
+            ]);
+            throw $e;
+        }
     }
 }
