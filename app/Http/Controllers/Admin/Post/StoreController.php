@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Admin\Post;
 
 use App\Http\Requests\Admin\Post\StoreRequest;
-use Illuminate\Support\Facades\Log; // ← 追加
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class StoreController extends BaseController
 {
@@ -15,6 +16,9 @@ class StoreController extends BaseController
 
         try {
             $data = $request->validated();
+            // ログインユーザーIDを自動セット
+            $data['user_id'] = Auth::id();
+            
             Log::info('StoreController validated data', [
                 'validated_data' => $data,
             ]);

@@ -8,16 +8,21 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class PostService
 {
     /**
      * 投稿を作成する
      */
+
     public function store(array $data): Post
     {
         try {
             DB::beginTransaction();
+
+            // ログインユーザーIDをセット
+            $data['user_id'] = Auth::id();
 
             // slug自動生成
             if (empty($data['slug'])) {
@@ -56,6 +61,7 @@ class PostService
         }
     }
 
+
     /**
      * 投稿を更新する
      */
@@ -63,6 +69,11 @@ class PostService
     {
         try {
             DB::beginTransaction();
+
+            // 投稿の所有者チェック
+            if ($post->user_id !== Auth::id()) {
+                throw new \Exception('この投稿を編集する権限がありません。');
+            }
 
             // タグ情報取り出し
             $tagIds = $data['tag_ids'] ?? [];

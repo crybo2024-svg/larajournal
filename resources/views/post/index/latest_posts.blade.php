@@ -59,6 +59,12 @@
                                 <i class="bi bi-calendar me-1"></i>
                                 {{ $post->created_at->format('M j, Y') }}
                             </div>
+                            
+                            <!-- 投稿者表示 -->
+                            <div class="mb-3 text-muted small">
+                                <i class="bi bi-person me-1"></i>
+                                {{ $post->user->name ?? 'Unknown' }}
+                            </div>
 
                             <p class="card-text mb-auto">{{ $post->shortBody() }}</p>
 

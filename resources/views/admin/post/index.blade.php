@@ -10,6 +10,7 @@
         <tr>
             <th>ID</th>
             <th>Post Title</th>
+            <th>Author</th> <!-- 追加 -->
             <th></th>
             <th></th>
             <th></th>
@@ -20,11 +21,12 @@
             <tr>
                 <td>{{ $post->id }}</td>
                 <td>{{ $post->title }}</td>
+                <td>{{ $post->user->name ?? '未設定' }}</td> <!-- 追加 -->
                 <td><a href="{{ route('admin.post.show', $post->id) }}">Info</a></td>
                 <td><a href="{{ route('admin.post.edit', $post->id) }}" class="text-success">Edit</a></td>
                 <td>
                     <form action="{{ route('admin.post.delete', $post->id)}}"
-                          method="post">
+                        method="post">
                         @csrf
                         @method('delete')
                         <button type="submit" class="border-0 bg-transparent">
@@ -36,6 +38,7 @@
         @endforeach
         </tbody>
     </table>
+
 
 
 @endsection
