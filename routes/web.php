@@ -6,6 +6,12 @@ use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+
+use App\Http\Middleware\AdminOrReader;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PostController::class, 'showHomepage'])->name('main.index');
 
-Auth::routes(['verify' => false]);
+Auth::routes(['verify' => true]);
 
 Route::prefix('contacts')->group(function () {
     Route::get('/', [ContactsController::class, 'showContacts'])
@@ -66,7 +72,7 @@ Route::prefix('personal')->namespace('')->middleware(['auth'])->group(function (
     });
 });
 
-Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->middleware(['auth', AdminOrReader::class])->group(function () {
     Route::prefix('main')->namespace('Main')->group(function () {
         Route::get('/', 'IndexController')->name('admin.main.index');
     });

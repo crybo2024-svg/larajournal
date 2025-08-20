@@ -9,10 +9,15 @@ class IndexController extends BaseController
 {
     public function __invoke(ViewFactory $view_factory)
     {
-        // 投稿者(user) とカテゴリ(category) を同時に取得
-        $posts = Post::with('user', 'category')
-                    ->orderBy('created_at', 'desc') // 作成日でソート
-                    ->get();
+        $query = Post::with('user', 'category')
+                     ->orderBy('created_at', 'desc');
+
+        // Admin以外は自分の投稿だけ取得
+        if (auth()->user()->role !== 'admin') {
+            $query->where('user_id', auth()->id());
+        }
+
+        $posts = $query->get();
 
         return $view_factory->make('admin.post.index', ['posts' => $posts]);
     }

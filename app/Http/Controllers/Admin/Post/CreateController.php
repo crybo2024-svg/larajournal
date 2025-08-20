@@ -10,9 +10,18 @@ class CreateController extends BaseController
 {
     public function __invoke(ViewFactory $view_factory)
     {
-        $categories = Category::all();
-        $tags       = Tag::all();
+        // Admin は全件、Reader は自分のデータだけ取得
+        $categories = auth()->user()->role === 'admin'
+            ? Category::all()
+            : Category::where('user_id', auth()->id())->get();
 
-        return $view_factory->make('admin.post.create', ['categories' => $categories, 'tags' => $tags]);
+        $tags = auth()->user()->role === 'admin'
+            ? Tag::all()
+            : Tag::where('user_id', auth()->id())->get();
+
+        return $view_factory->make('admin.post.create', [
+            'categories' => $categories,
+            'tags'       => $tags,
+        ]);
     }
 }
